@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 
 class GlowingMicButton extends StatelessWidget {
-  final bool isListening;
   final VoidCallback onTap;
 
-  const GlowingMicButton({
-    super.key,
-    required this.isListening,
-    required this.onTap,
-  });
+  const GlowingMicButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return AvatarGlow(
       glowCount: 3,
       glowRadiusFactor: 0.3,
-      animate: isListening,
+      animate: true,
       glowColor: Colors.orange.withAlpha((255 * 0.5).round()),
       duration: const Duration(milliseconds: 2000),
       repeat: true,
@@ -35,7 +30,7 @@ class GlowingMicButton extends StatelessWidget {
               BoxShadow(color: Colors.orange, blurRadius: 35, spreadRadius: 5),
             ],
           ),
-          child: Icon(isListening ? Icons.mic : Icons.mic_none_sharp, size: 35),
+          child: Icon(Icons.mic_none_sharp, size: 35),
         ),
       ),
     );

@@ -17,13 +17,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final SpeechToText speechToText = SpeechToText();
   bool speechEnabled = false;
-  bool isListening = false;
 
   String greeting = "Hi, how can I help you today?";
+  String? generatedContent;
+  String? generatedImageUrl;
   double buttonSize = 30;
   double iconsize = 25;
   String lastWords = '';
-  final OpenAiService openAiService = OpenAiService();
+  final OpenAIService openAiService = OpenAIService();
 
   @override
   void initState() {
@@ -37,20 +38,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> startListening() async {
-    isListening = true;
-    debugPrint("🎤 Started listening");
     await speechToText.listen(onResult: onSpeechResult);
     setState(() {});
   }
 
   Future<void> stopListening() async {
-    isListening = false;
     debugPrint("🛑 Stopped listening");
     await speechToText.stop();
     setState(() {});
   }
 
-  void onSpeechResult(SpeechRecognitionResult result) {
+  void onSpeechResult(SpeechRecognitionResult result) async {
     setState(() {
       lastWords = result.recognizedWords;
     });
@@ -59,16 +57,22 @@ class _HomePageState extends State<HomePage> {
       "🗣️ Recognized words: ${result.recognizedWords} (Final: ${result.finalResult})",
     );
 
-    // 🔥 THIS IS THE KEY FIX 🔥
-    // Only call OpenAI when we get the FINAL result
     if (result.finalResult && lastWords.trim().isNotEmpty) {
       debugPrint("🎉 FINAL SPEECH RESULT RECEIVED: $lastWords");
       debugPrint("🚀 Now calling OpenAI API...");
 
-      // Call OpenAI here (async, so it won't block UI)
-      openAiService.isArtPromptAPI(lastWords).then((result) {
-        debugPrint("📩 OpenAI call finished. Result: $result");
-      });
+      final speech = await openAiService.isArtPromptAPI(lastWords);
+      debugPrint("📩 OpenAI call finished. Result: $speech");
+
+      if (speech.contains('https')) {
+        generatedImageUrl = speech;
+        generatedContent = null;
+        setState(() {});
+      } else {
+        generatedImageUrl = null;
+        generatedContent = speech;
+        setState(() {});
+      }
     }
   }
 
@@ -109,7 +113,29 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Column(
           children: [
-            FadeInDown(child: Text(greeting, style: Fonts.italianaRegular)),
+            if (generatedImageUrl != null)
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.network(generatedImageUrl!),
+                ),
+              )
+            else
+              FadeInDown(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    generatedContent == null ? greeting : generatedContent!,
+                    style: Fonts.italianaRegular.copyWith(
+                      fontSize: generatedContent == null ? 25 : 18,
+                    ),
+                  ),
+                ),
+              ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -127,16 +153,14 @@ class _HomePageState extends State<HomePage> {
                     child: Icon(Icons.message_rounded, size: iconsize),
                   ),
                   GlowingMicButton(
-                    isListening: isListening,
                     onTap: () async {
                       if (!speechEnabled) {
                         await initSpeech();
                         return;
                       }
 
-                      if (isListening) {
+                      if (speechToText.isListening) {
                         await stopListening();
-                        // No API call here anymore — it's moved to onSpeechResult
                       } else {
                         if (await speechToText.hasPermission) {
                           await startListening();
