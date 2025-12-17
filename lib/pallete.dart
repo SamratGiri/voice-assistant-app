@@ -30,4 +30,14 @@ class Fonts {
     color: Colors.orangeAccent,
     fontWeight: FontWeight.w800,
   );
+  static const TextStyle interItalic = TextStyle(
+    fontFamily: "Inter-Italic",
+    fontSize: 24,
+    fontWeight: FontWeight.w800,
+  );
+  static const TextStyle italianaRegular = TextStyle(
+    fontFamily: "Italiana-Regular",
+    fontSize: 30,
+    fontWeight: FontWeight.w800,
+  );
 }

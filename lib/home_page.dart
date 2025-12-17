@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:glassmorphism/glassmorphism.dart';
-import 'package:siri_wave/siri_wave.dart' as siri_wave;
+
 import 'package:animate_do/animate_do.dart';
 import 'package:voice_assist_app/glowing_mic_button.dart';
+import 'package:voice_assist_app/openai_service.dart';
 import 'pallete.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,12 +16,67 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SpeechToText speechToText = SpeechToText();
-
+  bool speechEnabled = false;
   bool isListening = false;
-  String text = "Press  button and start speaking";
+
   String greeting = "Hi, how can I help you today?";
   double buttonSize = 30;
   double iconsize = 25;
+  String lastWords = '';
+  final OpenAiService openAiService = OpenAiService();
+
+  @override
+  void initState() {
+    super.initState();
+    initSpeech();
+  }
+
+  Future<void> initSpeech() async {
+    speechEnabled = await speechToText.initialize(debugLogging: true);
+    setState(() {});
+  }
+
+  Future<void> startListening() async {
+    isListening = true;
+    debugPrint("🎤 Started listening");
+    await speechToText.listen(onResult: onSpeechResult);
+    setState(() {});
+  }
+
+  Future<void> stopListening() async {
+    isListening = false;
+    debugPrint("🛑 Stopped listening");
+    await speechToText.stop();
+    setState(() {});
+  }
+
+  void onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      lastWords = result.recognizedWords;
+    });
+
+    debugPrint(
+      "🗣️ Recognized words: ${result.recognizedWords} (Final: ${result.finalResult})",
+    );
+
+    // 🔥 THIS IS THE KEY FIX 🔥
+    // Only call OpenAI when we get the FINAL result
+    if (result.finalResult && lastWords.trim().isNotEmpty) {
+      debugPrint("🎉 FINAL SPEECH RESULT RECEIVED: $lastWords");
+      debugPrint("🚀 Now calling OpenAI API...");
+
+      // Call OpenAI here (async, so it won't block UI)
+      openAiService.isArtPromptAPI(lastWords).then((result) {
+        debugPrint("📩 OpenAI call finished. Result: $result");
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    speechToText.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,70 +91,70 @@ class _HomePageState extends State<HomePage> {
             Text('Your virtual assistant ', style: Fonts.medium),
           ],
         ),
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: EdgeInsets.only(right: 20),
             child: CircleAvatar(radius: 18),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 10.0,
-        ).copyWith(bottom: 20),
-        child: Container(
-          margin: EdgeInsets.all(22),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Pallete.backgroundColor, Pallete.backgroundColor],
+      body: Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 20),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Pallete.backgroundColor, Pallete.backgroundColor],
+          ),
+        ),
+        child: Column(
+          children: [
+            FadeInDown(child: Text(greeting, style: Fonts.italianaRegular)),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(lastWords, style: Fonts.medium),
             ),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 80),
-              FadeInDown(
-                child: Text(
-                  greeting,
-                  style: const TextStyle(
-                    fontFamily: 'Cera Pro',
-                    color: Pallete.whiteColor,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  CircleAvatar(
+                    radius: buttonSize,
+                    backgroundColor: Colors.black26,
+                    child: Icon(Icons.message_rounded, size: iconsize),
                   ),
-                ),
+                  GlowingMicButton(
+                    isListening: isListening,
+                    onTap: () async {
+                      if (!speechEnabled) {
+                        await initSpeech();
+                        return;
+                      }
+
+                      if (isListening) {
+                        await stopListening();
+                        // No API call here anymore — it's moved to onSpeechResult
+                      } else {
+                        if (await speechToText.hasPermission) {
+                          await startListening();
+                        } else {
+                          await initSpeech();
+                        }
+                      }
+                    },
+                  ),
+                  CircleAvatar(
+                    radius: buttonSize,
+                    backgroundColor: Colors.black26,
+                    child: Icon(Icons.close, size: iconsize),
+                  ),
+                ],
               ),
-              Spacer(),
-
-              Spacer(),
-
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    CircleAvatar(
-                      radius: buttonSize,
-
-                      backgroundColor: Colors.black26,
-                      child: Icon(Icons.message_rounded, size: iconsize),
-                    ),
-
-                    GlowingMicButton(onTap: () {}),
-
-                    CircleAvatar(
-                      radius: buttonSize,
-
-                      backgroundColor: Colors.black26,
-
-                      child: Icon(Icons.close, size: iconsize),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

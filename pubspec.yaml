@@ -35,6 +35,7 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.2.3
   glassmorphism: ^3.0.0
+  http: ^1.6.0
   rive: ^0.14.0
   siri_wave: ^2.3.0
   speech_to_text: ^7.3.0
@@ -76,6 +77,14 @@ flutter:
         - asset: assets/fonts/Cera-Pro-Medium.otf
 
         - asset: assets/fonts/Cera-Pro-Bold.otf
+    - family: Italiana-Regular
+      fonts:
+
+        - asset: assets/fonts/Italiana-Regular.ttf
+    - family: Inter-Italic
+      fonts:
+
+        - asset: assets/fonts/Inter-Italic-wght.ttf
     # - family: Trajan Pro
     #   fonts:
     #     - asset: fonts/TrajanPro.ttf
