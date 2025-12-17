@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SpeechToText speechToText = SpeechToText();
+  final FlutterTts flutterTts = FlutterTts();
   bool speechEnabled = false;
 
   String greeting = "Hi, how can I help you today?";
@@ -30,6 +32,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     initSpeech();
+    initTextToSpeech();
+  }
+
+  Future<void> initTextToSpeech() async {
+    await flutterTts.setSharedInstance(true);
+    setState(() {});
   }
 
   Future<void> initSpeech() async {
@@ -46,6 +54,10 @@ class _HomePageState extends State<HomePage> {
     debugPrint("🛑 Stopped listening");
     await speechToText.stop();
     setState(() {});
+  }
+
+  Future<void> systemSpeak(String content) async {
+    await flutterTts.speak(content);
   }
 
   void onSpeechResult(SpeechRecognitionResult result) async {
@@ -72,6 +84,7 @@ class _HomePageState extends State<HomePage> {
         generatedImageUrl = null;
         generatedContent = speech;
         setState(() {});
+        await systemSpeak(speech);
       }
     }
   }
@@ -79,6 +92,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     speechToText.stop();
+    flutterTts.stop();
     super.dispose();
   }
 
@@ -113,29 +127,39 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Column(
           children: [
-            if (generatedImageUrl != null)
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(generatedImageUrl!),
-                ),
-              )
-            else
-              FadeInDown(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  child: Text(
-                    generatedContent == null ? greeting : generatedContent!,
-                    style: Fonts.italianaRegular.copyWith(
-                      fontSize: generatedContent == null ? 25 : 18,
-                    ),
-                  ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (generatedImageUrl != null)
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.network(generatedImageUrl!),
+                        ),
+                      )
+                    else
+                      FadeInDown(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          child: Text(
+                            generatedContent == null
+                                ? greeting
+                                : generatedContent!,
+                            style: Fonts.italianaRegular.copyWith(
+                              fontSize: generatedContent == null ? 25 : 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+            ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -170,10 +194,20 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                  CircleAvatar(
-                    radius: buttonSize,
-                    backgroundColor: Colors.black26,
-                    child: Icon(Icons.close, size: iconsize),
+                  GestureDetector(
+                    onTap: () async {
+                      await flutterTts.stop();
+                      setState(() {
+                        generatedContent = greeting;
+                        generatedImageUrl = null;
+                        lastWords = '';
+                      });
+                    },
+                    child: CircleAvatar(
+                      radius: buttonSize,
+                      backgroundColor: Colors.black26,
+                      child: Icon(Icons.close, size: iconsize),
+                    ),
                   ),
                 ],
               ),
