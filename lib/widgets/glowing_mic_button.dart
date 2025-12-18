@@ -33,7 +33,9 @@ class GlowingMicButton extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.orange.withValues(alpha: 0.5),
+                color: Colors.orange.withOpacity(
+                  0.5,
+                ), // Corrected from withValues
                 blurRadius: animate ? 35 : 10,
                 spreadRadius: animate ? 5 : 2,
               ),

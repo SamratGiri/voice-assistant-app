@@ -86,7 +86,7 @@ class ChatMessageTile extends StatelessWidget {
                     TypewriterAnimatedText(
                       message.text,
                       textStyle: Fonts.italianaRegular.copyWith(fontSize: 16),
-                      speed: const Duration(milliseconds: 50),
+                      speed: const Duration(milliseconds: 20),
                     ),
                   ],
                 )

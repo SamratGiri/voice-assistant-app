@@ -11,6 +11,7 @@ class ChatList extends StatelessWidget {
   final bool isSearching;
   final String lastWords;
   final bool isListening;
+  final bool skipTypewriter;
 
   const ChatList({
     super.key,
@@ -19,6 +20,7 @@ class ChatList extends StatelessWidget {
     required this.isSearching,
     required this.lastWords,
     required this.isListening,
+    this.skipTypewriter = false,
   });
 
   @override
@@ -50,10 +52,11 @@ class ChatList extends StatelessWidget {
 
         // 3. Displaying past messages
         final message = conversationHistory[index];
+        bool isLastMessage = index == conversationHistory.length - 1;
+
         return ChatMessageTile(
           message: message,
-          showTypewriter:
-              !message.isUser && index == conversationHistory.length - 1,
+          showTypewriter: !message.isUser && isLastMessage && !skipTypewriter,
         );
       },
     );

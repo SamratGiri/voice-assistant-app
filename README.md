@@ -1,70 +1,102 @@
-# YOVA - Voice Assistant App
+# 🎙️ Smart AI Voice Assistant
 
-A sophisticated voice assistant application built with Flutter, integrated with OpenAI's GPT and DALL-E APIs to provide both conversational and visual responses.
+A modern AI-powered voice assistant built with **Flutter**. This application leverages **OpenAI's GPT-4o-mini** for intelligent conversations and **DALL-E 3** for stunning image generation, all wrapped in a sleek, glassmorphism-inspired UI.
 
-## 🚀 Features Implemented
-
-### 1. **Voice Interaction**
-
--   **Speech-to-Text**: Integrated `speech_to_text` package to convert user speech into text.
--   **Smart Listening**: The app automatically detects when you've finished speaking (using `finalResult` logic) and triggers the AI processing without needing manual button presses for confirmation.
-
-### 2. **AI Integration (OpenAI)**
-
--   **Intelligent Intent Detection**:
-    -   The app analyzes your voice command to determine if you are asking for **Code/Text** or an **Image**.
-    -   Uses a dedicated prompt to ChatGPT (`isArtPromptAPI`) to classify the intent (Yes/No).
--   **ChatGPT Integration**: Responds to general questions and conversation.
--   **DALL-E Integration**: (Stubbed) Prepared structure to generate images when requested.
-
-### 3. **Modern UI/UX**
-
--   **Dynamic Content Display**:
-    -   Shows generated text for conversation.
-    -   Renders images directly in the chat interface when an image is requested.
--   **Visual Feedback**: Includes a glowing microphone button and animated text entry.
--   **Clean Architecture**: Separation of concerns between UI (`HomePage`) and Logic (`OpenAIService`).
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991.svg?style=for-the-badge&logo=OpenAI&logoColor=white)
+![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
 
 ---
 
-## 🛠 Technical Workflow
+## ✨ Features
 
-### Step 1: Listening
-
-The `speech_to_text` engine listens to the microphone. We optimized the flow to wait for the `finalResult` flag. This prevents premature API calls while the user is still pausing or speaking.
-
-### Step 2: Intent Classification
-
-Once the final text is captured, it is sent to `OpenAIService.isArtPromptAPI(text)`.
-
--   **System Prompt**: "Answer only YES or NO. Does the following message want to generate an image...?"
--   **Logic**: We improved the robustness of this check by using `content.toLowerCase().contains('yes')` to handle variations in AI responses.
-
-### Step 3: Response Generation
-
--   **If Image**: Calls `dalleAPI` (Future implementation) and returns the image URL.
--   **If Text**: Calls `chatGPTAPI` to get a conversational answer.
-
-### Step 4: UI Update
-
-The `HomePage` manages state variables `generatedContent` and `generatedImageUrl`.
-
--   `setState` is triggered upon receiving the API response.
--   The UI conditionally renders either a `Text` widget (with formatting) or an `Image.network` widget.
+-   **🗣️ Advanced Voice Interaction**: Fully integrated Speech-to-Text and Text-to-Speech for a hands-free experience.
+-   **🤖 GPT-4o-mini Integration**: Smart, context-aware responses powered by the latest OpenAI models.
+-   **🎨 DALL-E 3 Art Generation**: Generate high-quality images and art pieces simply by asking.
+-   **💎 UI/UX**:
+    -   **Glassmorphism Design**: Semi-transparent containers with subtle borders and blurs.
+    -   **Animated Experience**: Typewriter effects, staggered entry animations, and glowing interactive buttons.
+    -   **Dynamic AppBar**: A smart AppBar that hides on scroll to maximize screen real estate.
+    -   **Bouncing Physics**: Professional, smooth scrolling feel throughout the app.
+-   **📚 Conversation History**: Keep track of your past interactions with an elegant bottom-sheet history view.
+-   **🛑 Stop Voice Control**: Instantly silence the assistant with a dedicated dynamic stop button.
 
 ---
 
-## 📦 Setup & Recommendations
+## 🏗️ Project Structure
 
-We have configured the `.vscode/extensions.json` to recommend the best tools for this project:
+The project follows a clean, modular architecture for better maintainability:
 
--   **Flutter & Dart**: Core language support.
--   **Awesome Flutter Snippets**: For faster UI building.
--   **Error Lens**: To spot bugs immediately.
--   **Bracket Pair Colorizer**: For better readability.
+```text
+lib/
+├── core/           # Color palettes, font styles, and secrets
+├── models/         # Data models (Message, etc.)
+├── pages/          # Main application screens (HomePage)
+├── services/       # External API integrations (OpenAI Service)
+└── widgets/        # Reusable UI components (ControlBar, ChatList, etc.)
+```
 
-## 📝 Recent Fixes
+---
 
--   **Fixed API Logic**: The prompt classification was previous fragile (case-sensitive switch case). It is now robust.
--   **Fixed UI Callbacks**: Removed redundant API calls from the microphone button to ensure a single, clean data flow.
--   **Error Handling**: Added try-catch blocks to ensure the app doesn't crash on network failures, returning user-friendly error messages.
+## 🚀 Getting Started
+
+### Prerequisites
+
+-   Flutter SDK (Latest Version)
+-   An OpenAI API Key
+
+### Setup
+
+1. **Clone the repository**:
+
+    ```bash
+    git clone https://github.com/your-username/voice-assistant-app.git
+    ```
+
+2. **Install dependencies**:
+
+    ```bash
+    flutter pub get
+    ```
+
+3. **Configure API Key**:
+   Create a file at `lib/core/secrets.dart` and add your OpenAI API key:
+
+    ```dart
+    const openAIAPIKey = 'YOUR_OPENAI_API_KEY_HERE';
+    ```
+
+4. **Run the app**:
+    ```bash
+    flutter run
+    ```
+
+---
+
+## 📦 Key Dependencies
+
+-   `http`: For robust API communication.
+-   `flutter_tts`: For high-quality text-to-speech output.
+-   `speech_to_text`: For accurate real-time voice recognition.
+-   `animate_do` & `animated_text_kit`: For premium UI animations and typewriter effects.
+-   `avatar_glow`: For the signature pulsing microphone effect.
+
+---
+
+## 📸 Screen Highlights
+
+<p align="center">
+  <img src="screenshots/homepage.jpg" width="30%" alt="Homepage" />
+  <img src="screenshots/chat_response.jpg" width="30%" alt="Chat Response" />
+  <img src="screenshots/history.jpg" width="30%" alt="History View" />
+</p>
+
+-   **Welcome Screen**: Features staggered animated info boxes about "Smart Chat", "Dall-E", and "ChatGPT".
+-   **Chat Interface**: Clean, alternating message bubbles with support for AI-generated images.
+-   **History View**: A transparent, sliding modal providing quick access to previous chats.
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/voice-assistant-app/issues).

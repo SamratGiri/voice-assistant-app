@@ -21,6 +21,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Flag to skip typewriter animation when stop audio is pressed
+  bool _skipTypewriterAnimation = false;
   final SpeechToText speechToText = SpeechToText();
   final FlutterTts flutterTts = FlutterTts();
   final ScrollController _scrollController = ScrollController();
@@ -109,6 +111,7 @@ class _HomePageState extends State<HomePage> {
     await flutterTts.stop();
     setState(() {
       isSpeaking = false;
+      _skipTypewriterAnimation = true;
     });
   }
 
@@ -124,6 +127,7 @@ class _HomePageState extends State<HomePage> {
         conversationHistory.add(
           Message(text: lastWords, isUser: true, timestamp: DateTime.now()),
         );
+        _skipTypewriterAnimation = false;
       });
       scrollToBottom();
 
@@ -164,6 +168,7 @@ class _HomePageState extends State<HomePage> {
       conversationHistory.add(
         Message(text: text, isUser: true, timestamp: DateTime.now()),
       );
+      _skipTypewriterAnimation = false;
     });
     scrollToBottom();
 
@@ -296,6 +301,7 @@ class _HomePageState extends State<HomePage> {
                         isSearching: isSearching,
                         lastWords: lastWords,
                         isListening: speechToText.isListening,
+                        skipTypewriter: _skipTypewriterAnimation,
                       ),
               ),
             ),
