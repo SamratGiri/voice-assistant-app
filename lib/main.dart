@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:voice_assist_app/home_page.dart';
-import 'package:voice_assist_app/pallete.dart';
+import 'package:voice_assist_app/pages/home_page.dart';
+import 'package:voice_assist_app/core/pallete.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +19,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ).copyWith(scaffoldBackgroundColor: Pallete.backgroundColor),
       home: HomePage(),
-      
     );
   }
 }

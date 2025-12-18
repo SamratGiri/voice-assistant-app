@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:voice_assist_app/secrets.dart';
+import 'package:voice_assist_app/core/secrets.dart';
 
 class OpenAIService {
   List<Map<String, String>> chatGPTMessages = [];
@@ -87,11 +87,11 @@ class OpenAIService {
         return content;
       } else {
         debugPrint("❌ API Error (Status ${res.statusCode}): $decodedBody");
-        return "success";
+        return "An internal error occurred.";
       }
     } catch (e) {
       debugPrint("❌ Exception during OpenAI call: $e");
-      return "success";
+      return "An internal error occurred.";
     }
   }
 
@@ -107,7 +107,7 @@ class OpenAIService {
           "Authorization": "Bearer $openAIAPIKey",
         },
         body: jsonEncode({
-          "model": "gpt-image-1.5",
+          "model": "dall-e-3",
           "prompt": prompt,
           "n": 1,
           "size": "1024x1024",
